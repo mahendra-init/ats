@@ -1,13 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CgProfile, CgLogOut } from "react-icons/cg";
 import { FaBloggerB } from "react-icons/fa";
 import { MdGroups } from "react-icons/md";
 import Chat from "./Chat";
+import Blog from "./Blog";
+import Profile from "../Profile";
+import CreateBlog from "./CreateBlog";
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { db, auth } from "../../firebase";
+import { collection, doc, getDoc } from "@firebase/firestore";
+import { toast } from "react-toastify";
 
 function Dashboard() {
   const [profile, setShowProfile] = useState(true);
   const [blog, setShowBlog] = useState(false);
+  const [createBlog, setShowCreateBlog] = useState(false);
   const [groupChat, setShowGroupChat] = useState(false);
+  const navigate = useNavigate();
+  let [uid, setUid] = useState("");
+  let [userDetails, setUserDetails] = useState([]);
+
+  const getDetails = async () => {
+    if (uid) {
+      const userCollectionRef = collection(db, `users`);
+      const userDocRef = doc(userCollectionRef, uid);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+        setUserDetails(docSnap.data());
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    }
+  };
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      setUid(user.uid);
+    });
+    getDetails();
+  }, [uid]);
 
   let handleClick = (value) => {
     switch (value) {
@@ -15,18 +47,30 @@ function Dashboard() {
         setShowProfile(true);
         setShowBlog(false);
         setShowGroupChat(false);
-
+        setShowCreateBlog(false);
         break;
       case "blog":
         setShowProfile(false);
         setShowBlog(true);
         setShowGroupChat(false);
-
+        setShowCreateBlog(false);
+        break;
+      case "createblog":
+        setShowProfile(false);
+        setShowBlog(false);
+        setShowGroupChat(false);
+        setShowCreateBlog(true);
         break;
       case "groupchat":
         setShowProfile(false);
         setShowBlog(false);
         setShowGroupChat(true);
+        setShowCreateBlog(false);
+        break;
+      case "logout":
+        signOut(auth);
+        toast.success("Logout Successfull");
+        navigate("/login", { replace: true });
 
         break;
       default:
@@ -35,106 +79,62 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex w-full h-full">
-      <div className=" border-r-4 w-56 flex justify-center items-center text-xl">
+    <div className="flex w-full h-full ">
+      <aside className=" border-r-4 w-56 p-2 h-screen text-xl sticky">
         <ul className="space-y-3 mt-3">
           <div
             onClick={() => handleClick("profile")}
-            className={`flex justify-between items-center space-x-1 p-3 hover:cursor-pointer ${
+            className={`flex items-center space-x-3 p-3 hover:cursor-pointer ${
               profile ? "shadow-lg rounded-lg" : " shadow-none"
             }`}
           >
-            <p>Profile</p> <CgProfile />
+            <CgProfile />
+            <p>Profile</p>
           </div>
           <div
             onClick={() => handleClick("blog")}
-            className={`flex justify-between items-center space-x-1 p-3 hover:cursor-pointer ${
+            className={`flex items-center space-x-3 p-3 hover:cursor-pointer ${
               blog ? "shadow-lg rounded-lg" : " shadow-none"
             }`}
           >
-            Blog <FaBloggerB />
+            <FaBloggerB />
+            <p>View Blog</p>
+          </div>
+          <div
+            onClick={() => handleClick("createblog")}
+            className={`flex items-center space-x-3 p-3 hover:cursor-pointer ${
+              createBlog ? "shadow-lg rounded-lg" : " shadow-none"
+            }`}
+          >
+            <strong className="text-xl font-bold space-x-3">+</strong>
+            <p>Create Blog</p>
           </div>
           <div
             onClick={() => handleClick("groupchat")}
-            className={`flex justify-between items-center space-x-1 p-3 hover:cursor-pointer ${
+            className={`flex items-center space-x-3 p-3 hover:cursor-pointer ${
               groupChat ? "shadow-lg rounded-lg" : " shadow-none"
             }`}
           >
-            <p>
-              Group
-              <br />
-              Chat
-            </p>
             <MdGroups />
+            <p>Group Chat</p>
           </div>
           <div
             onClick={() => handleClick("logout")}
-            className={`flex justify-between items-center space-x-1 p-3 hover:cursor-pointer`}
+            className={`flex items-center space-x-3 p-3 hover:cursor-pointer`}
           >
-            <p>Logout</p>
             <CgLogOut />
+            <p>Logout</p>
           </div>
         </ul>
-      </div>
-      <div className="m-4 flex-1">
-        <Profile profile={profile} />
+      </aside>
+      <main className="m-4 flex-1 ">
+        <Profile profile={profile} userDetails={userDetails} />
         <Blog blog={blog} />
+        <CreateBlog createBlog={createBlog} />
         <Chat room="ace" groupchat={groupChat} />
-      </div>
+      </main>
     </div>
   );
 }
 
 export default Dashboard;
-
-function Profile({ profile }) {
-  if (profile) {
-    return (
-      <>
-        <div className="flex flex-col p-3 mt-4 bg-white shadow-xl w-full flex-1">
-          <h1 className="text-xl font-bold">Profile</h1>
-          <div className="mt-4">
-            <div>
-              <label>Name: </label>
-              <span>Shivam Patel</span>
-            </div>
-            <div>
-              <label>Mobile Number: </label>
-              <span>9108221847</span>
-            </div>
-            <div>
-              <label>Email Id: </label>
-              <span>patelshivam.0212@gmail.com</span>
-            </div>
-            <div>
-              <label>College Name: </label>
-              <span>Atharva College Of Engineering</span>
-            </div>
-            <div>
-              <label>Graduation Year: </label>
-              <span>2024</span>
-            </div>
-            <div>
-              <label>Stream: </label>
-              <span>IT</span>
-            </div>
-            <div className="flex justify-end ">
-              <button className=" rounded-xl shadow-md mr-3 px-3 py-2 bg-slate-600 text-white">
-                Edit
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="p-3 mt-4 bg-white shadow-xl w-full  ">
-          <h1 className="text-xl font-bold">Intrest</h1>
-        </div>
-      </>
-    );
-  }
-}
-
-function Blog({ blog }) {
-  if (blog) {
-    return <div>blog</div>;
-  }
-}

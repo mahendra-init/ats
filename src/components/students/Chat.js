@@ -9,6 +9,7 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
+import { CgProfile } from "react-icons/cg";
 
 const Chat = ({ room, groupchat }) => {
   const [messages, setMessages] = useState([]);
@@ -26,11 +27,9 @@ const Chat = ({ room, groupchat }) => {
       snapshot.forEach((doc) => {
         messages.push({ ...doc.data(), id: doc.id });
       });
-      console.log(messages);
       setMessages(messages);
     });
     return () => unsuscribe();
-    // eslint-disable-next-line
   }, []);
 
   const handleSubmit = async (event) => {
@@ -41,6 +40,8 @@ const Chat = ({ room, groupchat }) => {
       text: newMessage,
       createdAt: serverTimestamp(),
       user: auth.currentUser.displayName,
+      photoURL: auth.currentUser.photoURL,
+      uid: auth.currentUser.uid,
       room,
     });
 
@@ -48,21 +49,39 @@ const Chat = ({ room, groupchat }) => {
   };
   if (groupchat) {
     return (
-      <div className="flex flex-col items-center font-serif w-[90%] mx-0 my-auto rounded-md overflow-hidden border-[2px] border-blue-400">
-        <div className="header bg-blue-400 text-white w-[100%] text-center">
-          <h1>{room.toUpperCase()}</h1>
-        </div>
-        <div className="flex flex-col items-start w-[100%] h-[80%] overflow-y-auto p-4 mb-3">
-          {messages.map((message) => (
-            <div key={message.id} className="flex items-start mb-3">
-              <span className="user font-bold w-[100%] text-[#333]">
-                {message.user}:
-              </span>{" "}
-              {message.text}
+      <div className="flex flex-col  h-[75vh] items-center font-serif w-[100%] mx-0 my-auto rounded-md overflow-hidden border-[2px] border-blue-400">
+        <h1 className="text-2xl header bg-blue-400 text-white w-[100%] text-center font-sans font-semibold py-2">
+          {room.toUpperCase()}
+        </h1>
+        <div className="flex-1 flex flex-col w-full overflow-y-auto p-4 mb-3 space-y-3">
+          {messages.map(({ id, uid, photoURL, user, text }) => (
+            <div
+              key={id}
+              className={`flex w-[60%] p-3 ml-4 space-x-3 border rounded-2xl shadow-lg ${
+                uid === auth.currentUser.uid
+                  ? "bg-blue-400 text-white rounded-tr-none"
+                  : "bg-white text-blue-400 rounded-tl-none"
+              }`}
+            >
+              {photoURL ? (
+                <img
+                  src={photoURL}
+                  alt="user_photo"
+                  className="w-[36px] h-[36px] object-cover rounded-full"
+                />
+              ) : (
+                <CgProfile className="w-10 h-10" />
+              )}
+              <p className="text-sm font-semibold font-sans text-gray-800">
+                {user} <br />{" "}
+                <span className="text-sm font-normal text-gray-600 font-sans">
+                  {text}
+                </span>
+              </p>
             </div>
           ))}
         </div>
-        <form onSubmit={handleSubmit} className="flex w-[100%] p-3">
+        <form className="flex w-[100%] mx-4 p-3 border-t-2">
           <input
             type="text"
             value={newMessage}
@@ -71,7 +90,9 @@ const Chat = ({ room, groupchat }) => {
             placeholder="Type your message here..."
           />
           <div className="bg-blue-400 text-white text-md font-bold rounded-lg flex justify-center items-center px-3">
-            <button type="submit">Send</button>
+            <button type="submit" onClick={handleSubmit}>
+              Send
+            </button>
           </div>
         </form>
       </div>

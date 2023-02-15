@@ -1,13 +1,12 @@
 import React from 'react'
 import { useState } from 'react'
-import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
 import { Link } from 'react-router-dom';
-import OAuth from '../components/OAuth';
-import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom';
+import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
+import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { toast } from 'react-toastify';
 
-export default function SignIn() {
+export default function Login() {
   const navigate = useNavigate()
   async function onSubmit(e){
     e.preventDefault()
@@ -15,10 +14,10 @@ export default function SignIn() {
       const auth = getAuth()
       const userCredentials = await signInWithEmailAndPassword(auth,email,password)
       if(userCredentials.user){
-        navigate('/')
+        navigate('/studentdashboard')
       }
     } catch (error) {
-      toast.error('Bad Credentials');
+      toast.error('Invalid Login Credentials');
     }
   }
   const [showpassword,setshowpassword]=useState(false)
@@ -35,7 +34,7 @@ export default function SignIn() {
   )}
   return (
     <section>
-      <h1 className="text-3xl text-center mt-6 font-bold">Sign In</h1>
+      <h1 className="text-3xl text-center mt-6 font-bold">Login In</h1>
       <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
         <div className="md:w-[67%] lg:w-[50%] mb-12 md:mb-6">
           <img
@@ -79,20 +78,15 @@ export default function SignIn() {
             </div>
             <div className='flex justify-between mt-3 mb-5 whitespace-nowrap text-sm sm:text-lg' >
               <p>Don't Have Account?<Link className='ml-1 text-red-600 hover:text-red-700 
-              transition duration-200 ease-in-out' to='/sign-up'>Register</Link></p>
+              transition duration-200 ease-in-out' to='/register'>Register</Link></p>
               <Link className='text-blue-600 hover:text-blue-700 transition duration-200 ease-in-out' 
-              to='/forgot-password'>Forgot Password?</Link>
+              to='/forget-password'>Forgot Password?</Link>
             </div>
             <button className='text-center w-full bg-blue-600 text-white px-7 py-3 text-sm font-medium 
             uppercase rounded shadow-md hover:bg-blue-700 transition duration-100 ease-in-out 
             hover:shadow-lg active:bg-blue-800' type='submit'>Sign-In</button>
-              <div className='flex my-4 before:border-t before:flex-1 items-center
-               before:border-gray-300 after:border-t after:flex-1 after:border-gray-300'>
-                <p className='text-center font-semibold mx-4'>OR</p>
-              </div>
               </form> 
-              <OAuth />
-              </div>
+            </div>
       </div>
     </section>
   )
