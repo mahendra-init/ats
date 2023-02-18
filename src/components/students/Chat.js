@@ -30,7 +30,7 @@ const Chat = ({ room, groupchat }) => {
       setMessages(messages);
     });
     return () => unsuscribe();
-  }, []);
+  }, [messages]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();

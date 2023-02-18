@@ -1,12 +1,30 @@
 import React, { useState } from "react";
+import { db } from '../../firebase';
+import { collection, doc, setDoc } from '@firebase/firestore';
 
-function CreateBlog({ createBlog }) {
+function CreateBlog({ createBlog, uid }) {
   const [blogTitle, setBlogTitle] = useState("");
   const [blogContent, setBlogContent] = useState("");
-  const [blogAttachment, setBlogAttachment] = useState("");
   let handleClick = () => {
-    console.log("button");
+    try{
+      const userCollectionRef = collection(db, `users`);
+      const userDocRef = doc(userCollectionRef, uid)
+      const blogCollectionRef = collection(userDocRef, `blogs`);
+      const blogDocRef = doc(blogCollectionRef);
+  
+      setDoc(blogDocRef, {
+          title: blogTitle,
+          content: blogContent,
+      });
+  
+      setBlogContent('');
+      setBlogTitle('');
+      console.log('Data successfully added to Firestore');
+    }catch(error) {
+      console.log(error.message);
+    }
   };
+
   if (createBlog) {
     return (
       <>
@@ -15,6 +33,7 @@ function CreateBlog({ createBlog }) {
           <input
             placeholder="Blog Title"
             type="text"
+            value={blogTitle}
             className="p-2"
             onChange={(e) => setBlogTitle(e.target.value)}
           />
@@ -22,17 +41,10 @@ function CreateBlog({ createBlog }) {
             rows={10}
             placeholder="Blog Content"
             type="textarea"
+            value={blogContent}
             className="p-2"
             onChange={(e) => setBlogContent(e.target.value)}
           />
-          <div className="space-x-2">
-            <label>Blog attachment</label>
-            <input
-              placeholder="Blog Attachment"
-              type="file"
-              onChange={(e) => setBlogAttachment(e.target.value)}
-            />
-          </div>
           <button
             className="p-2 bg-blue-400 rounded-full font-bold text-white"
             onClick={handleClick}

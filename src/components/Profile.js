@@ -1,26 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 function Profile({ profile, userDetails }) {
-  const [editable, setEditable] = useState(false);
-  //   useEffect(() => {}, [editable]);
-
+  const [enabled, setEnabled] = useState(false);
   if (profile) {
     return (
       <>
         <div className="flex flex-col p-3 mt-4 bg-white shadow-xl">
           <div className="flex">
-            <h1 className="text-xl flex-1 font-bold">Profile</h1>
+            <h1 className="text-2xl flex-1 font-extrabold">Profile</h1>
             <button
               className={`rounded-xl font-md shadow-md mr-3 px-4 py-1  text-white ${
-                editable ? "bg-blue-400" : "bg-slate-600"
+                enabled ? "bg-blue-400" : "bg-slate-600"
               }`}
-              onClick={(e) => setEditable(!editable)}
+              onClick={() => {}}
             >
               Update
             </button>
           </div>
-          <div className="flex space-x-5">
-            <div class="grid grid-cols-1">
+          <div className="flex space-x-10 mt-10 ml-10">
+            <div class="grid grid-cols-[200px] gap-3 font-bold text-xl">
               <div>
                 <label>Name: </label>
               </div>
@@ -55,89 +53,75 @@ function Profile({ profile, userDetails }) {
                 <label>Employment: </label>
               </div>
             </div>
-            <div class="grid grid-cols-1">
+            <div class="grid grid-cols-[250px] gap-3">
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.name}
-                  contentEditable={false}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.contactno}
-                  contentEditable={editable}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.email}
-                  contentEditable={editable}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
-                  value={userDetails.uid}
-                  contentEditable={false}
+                  className="outline-none w-full"
+                  value={userDetails.university_id}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.college}
-                  contentEditable={false}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.graduationyear}
-                  contentEditable={false}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.stream}
-                  contentEditable={false}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.gender}
-                  contentEditable={false}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.nationality}
-                  contentEditable={false}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.category}
-                  contentEditable={false}
                 />
               </div>
               <div>
                 <input
-                  className="outline-none"
+                  className="outline-none w-full"
                   value={userDetails.empstatus}
-                  contentEditable={editable}
                 />
               </div>
             </div>
           </div>
-        </div>
-        <div className="p-3 mt-4 bg-white shadow-xl w-full  ">
-          <h1 className="text-xl font-bold">Intrest</h1>
         </div>
       </>
     );

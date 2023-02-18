@@ -1,12 +1,14 @@
 import React from 'react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom';
-import  {getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import  { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { db, auth } from "../../firebase";
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
+import {AiOutlineArrowLeft} from 'react-icons/ai'
+import {FaUserCheck} from 'react-icons/fa'
+import {MdVerifiedUser} from 'react-icons/md'
 
 export default function SignUp() {
   const navigate = useNavigate()
@@ -18,13 +20,15 @@ export default function SignUp() {
     graduationyear:'',
     contactno:'',
     stream:'',
-    uid:'',
+    university_id:'',
     gender:'',
     nationality:'',
     category:'',
     empstatus:'',
+    verified: false,
+    _id: '',
   });
-  const {name, email, password, college, graduationyear, stream, uid, contactno, gender, nationality, category, empstatus} = formdata;
+  const {name, email, password, college, graduationyear, stream, university_id, contactno, gender, nationality, category, empstatus, verified, _id} = formdata;
   function change(e){
     setformdata((prevState)=>({
       ...prevState,
@@ -34,15 +38,17 @@ export default function SignUp() {
 
   async function onSubmit(e) {
     e.preventDefault()
+    console.log(auth)
     try {
-      if(!formdata.category || !formdata.college || !formdata.contactno || !formdata.email || !formdata.empstatus || !formdata.gender || !formdata.graduationyear || !formdata.name || !formdata.nationality || !formdata.password || !formdata.stream || !formdata.uid){
+      if(!formdata.category || !formdata.college || !formdata.contactno || !formdata.email || !formdata.empstatus || !formdata.gender || !formdata.graduationyear || !formdata.name || !formdata.nationality || !formdata.password || !formdata.stream || !formdata.university_id){
         toast.error("Please Fill all the fields")
       }else{
-        const userCredentials = await createUserWithEmailAndPassword(auth, email, password, college, graduationyear, stream, uid, contactno, gender, nationality, category, empstatus)
+        const userCredentials = await createUserWithEmailAndPassword(auth, email, password, college, graduationyear, stream, university_id, contactno, gender, nationality, category, empstatus, verified, _id)
         updateProfile(auth.currentUser, {
           displayName: name
         })
         const user = userCredentials.user;
+        formdata._id = user.uid
         formdata.timestamp = serverTimestamp();
         await setDoc(doc(db, 'users', user.uid), formdata)
         toast.success(
@@ -51,27 +57,33 @@ export default function SignUp() {
         navigate('/login')
       }
       } catch (error) {
+        console.log(error)
         toast.error("Error Occured while Registration. Pleasr try again letter!!")
       }
     }
   return (
     <section>
-      <h1 className="text-3xl text-center mt-6 font-bold">Sign Up</h1>
-      <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
-        <div className="md:w-[67%] lg:w-[50%] mb-12 md:mb-6">
+      <div className='bg-indigo-400 text-white p-2 m-2 font-bold text-xl'>
+      <Link to='/'><AiOutlineArrowLeft className='w-6 h-6 '/></Link>
+      </div>
+      <div></div>
+      <h1 className="text-3xl text-center mt-6 font-bold text-indigo-400">Sign Up</h1>
+      <FaUserCheck className='w-10 h-10 text-indigo-400 animate-bounce' id="user-icon"/>
+      <div className="flex justify-between flex-wrap items-center px-3 py-12 mt-8 max-w-3xl mx-auto login">
+        {/* <div className="md:w-[67%] lg:w-[50%] mb-12 md:mb-6">
           <img
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAindiDaLEaTL1GmO_uRBKeWbm
             oJWO__oOcEzhV11FdPOj9zWOI2vUhWAvfOXUaUAz96Q&usqp=CAU"
             alt="key"
             className="w-full rounded-2xl"
           />
-        </div>
-        <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
+        </div> */}
+         {/* <div className="body-img"><img src='bodyimg.png' alt="" /></div> */}
+        <div className="w-full md:w-[67%] lg:w-[80%] lg:ml-20">
           <form onSubmit={onSubmit}>
-
           <input type='text'
-            className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 
-            rounded transition ease-in-out"
+            className="mb-6 px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 
+            rounded transition ease-in-out w-full"
             value={name}
             id='name'
             placeholder='Full Name'
@@ -93,7 +105,7 @@ export default function SignUp() {
             type="text"
             value={contactno}
             id='contactno'
-            placeholder='contactno'
+            placeholder='Contact No'
             onChange={change}
             />
 
@@ -124,12 +136,12 @@ export default function SignUp() {
             <input type='text'
             className="mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 
             rounded transition ease-in-out"
-            value={uid}
-            id='uid'
+            value={university_id}
+            id='university_id'
             placeholder='University ID'
             onChange={change}></input>
 
-            <input type='text' className='mb-6 w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 
+            <input type='text' className='w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 
             rounded transition ease-in-out' 
             placeholder='Gender' id='gender' value={gender} onChange={change} />
 
@@ -166,12 +178,14 @@ export default function SignUp() {
               <Link className='text-blue-600 hover:text-blue-700 transition duration-200 ease-in-out' 
               to='/forgot-password'>Forgot Password?</Link>
             </div>
-            <button className='text-center w-full bg-blue-600 text-white px-7 py-3 text-sm font-medium 
+            <button className='text-center w-full bg-indigo-400 text-white px-7 py-3 text-sm font-medium 
             uppercase rounded shadow-md hover:bg-blue-700 transition duration-100 ease-in-out 
             hover:shadow-lg active:bg-blue-800' type='submit'>Sign-Up</button>
               </form> 
               </div>
       </div>
+      <MdVerifiedUser className='w-10 h-10 text-indigo-400 animate-bounce' id='verified'/>
+      <div className="circle1 bg-indigo-400 w-30"></div>
     </section>
   )
 }

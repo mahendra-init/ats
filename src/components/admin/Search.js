@@ -7,7 +7,7 @@ function Search({ search }) {
     return (
       <>
         <div>
-          <input placeholder="search..." value={search} id="search" />
+          <input placeholder="search..." value={''} id="search" />
           <button>Search</button>
         </div>
       </>

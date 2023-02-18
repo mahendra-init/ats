@@ -1,8 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import { db } from '../../firebase';
-import { collection, doc, orderBy, onSnapshot } from '@firebase/firestore';
-
-
+import { db } from '../firebase';
+import { collection, orderBy, onSnapshot, doc } from '@firebase/firestore';
 
 const DisplayBlog = ({title, content}) => (
 
@@ -26,38 +24,37 @@ const DisplayBlog = ({title, content}) => (
   </div>
 );
 
-function Blog({blog, uid}) {
-  const [ blogs, setBlogs ] = useState([]);
+const BlogFeature = () => {
+const [ blogs, setBlogs ] = useState([]);
 
   useEffect(() => {
-        if(uid){
-            const userCollectionRef = collection(db, `users`);
-            const userDocRef = doc(userCollectionRef, uid)
-            const blogCollectionRef = collection(userDocRef, `blogs`);
+    try{
+        const userCollectionRef = collection(db, `users`);
+        const userDocRef = doc(userCollectionRef)
+            const blogCollectionRef = collection(userDocRef, 'blogs');
 
-            onSnapshot(blogCollectionRef, orderBy('created', 'desc'), (snapshot) => {
+        onSnapshot(blogCollectionRef, orderBy('created', 'desc'), (snapshot) => {
 
-              /// setblogs is update is delay
-                setBlogs(snapshot.docs.map(doc => ({
-                    id: doc.id, 
-                    data: doc.data()
-                })));
-              });
-        } else {
-            setBlogs([])
-        }
+          /// setblogs is update is delay
+            setBlogs(snapshot.docs.map(doc => ({
+                id: doc.id, 
+                data: doc.data()
+            })));
+          });
 
-    }, [uid])
-
-    if(blog){
-      return (
-        <div className='h-screen'>
+    }catch(error){
+        console.log(error.message)
+    }
+    }, [])
+    console.log(blogs)
+  return (
+   <div className='h-screen'>
+    Hiiiii
        { blogs.map(({id, data}) => (
           <DisplayBlog key={id} title={data.title} content={data.content}/>
           ))}
         </div>
-        )
-    }
+  )
 }
 
-export default Blog;
+export default BlogFeature

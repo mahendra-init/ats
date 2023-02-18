@@ -1,90 +1,122 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CreateEvent from "./CreateEvent";
-import RegisterCollege from "./RegisterCollege";
 import Search from "./Search";
 import UpdateAlumni from "./UpdateAlumni";
+import CollegeProfile from "./CollegeProfile";
+import DisplayEvent from "./DisplayEvent";
 import VerifyAlumni from "./VerifyAlumni";
 import { BiSearch } from "react-icons/bi";
 import { MdAppRegistration } from "react-icons/md";
 import { RxUpdate } from "react-icons/rx";
 import { GoVerified } from "react-icons/go";
 import { BsCalendar2Event } from "react-icons/bs";
+import { collection, doc, getDoc } from "@firebase/firestore";
+import { db, auth } from "../../firebase";
 
 function AdminDashBoard() {
-  const [register, setShowRegister] = useState(true);
+  const [display, setShowDisplay] = useState(true);
   const [search, setShowSearch] = useState(false);
   const [update, setShowUpdate] = useState(false);
   const [verify, setShowVerify] = useState(false);
   const [create, setShowCreate] = useState(false);
+  const [displayEvent, setDisplayEvent] = useState(false);
+  let [uid, setUid] = useState("");
+  let [adminDetails, setAdminDetails] = useState([]);
+
+ const getDetails = async () => {
+    if (uid) {
+      const adminCollectionRef = collection(db, `admins`);
+      const adminDocRef = doc(adminCollectionRef, uid);
+      const docSnap = await getDoc(adminDocRef);
+      if (docSnap.exists()) {
+        setAdminDetails(docSnap.data());
+      } else {
+        console.log("No such document!");
+      }
+    }
+  };
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      setUid(user.uid);
+    });
+    getDetails();
+  }, [uid]);
 
   const handleClick = (value) => {
     switch (value) {
-      case "register":
-        setShowRegister(true);
+      case "display":
+        setShowDisplay(true);
         setShowSearch(false);
         setShowUpdate(false);
         setShowVerify(false);
         setShowCreate(false);
-
+        setDisplayEvent(false);
+        
         break;
-      case "search":
-        setShowRegister(false);
-        setShowSearch(true);
-        setShowUpdate(false);
-        setShowVerify(false);
-        setShowCreate(false);
-
-        break;
-      case "update":
-        setShowRegister(false);
-        setShowSearch(false);
-        setShowUpdate(true);
-        setShowVerify(false);
-        setShowCreate(false);
-
-        break;
-      case "verify":
-        setShowRegister(false);
-        setShowSearch(false);
-        setShowUpdate(false);
-        setShowVerify(true);
-        setShowCreate(false);
-
-        break;
-      case "create":
-        setShowRegister(false);
-        setShowSearch(false);
-        setShowUpdate(false);
-        setShowVerify(false);
-        setShowCreate(true);
-
-        break;
-      case "channel":
-        setShowRegister(false);
-        setShowSearch(false);
-        setShowUpdate(false);
-        setShowVerify(false);
-        setShowCreate(false);
-
-        break;
-
-      default:
-        break;
+        case "search":
+          setShowDisplay(false);
+          setShowSearch(true);
+          setShowUpdate(false);
+          setShowVerify(false);
+          setShowCreate(false);
+          setDisplayEvent(false);
+          
+          break;
+          case "update":
+            setShowDisplay(false);
+            setShowSearch(false);
+            setShowUpdate(true);
+            setShowVerify(false);
+            setShowCreate(false);
+            setDisplayEvent(false);
+            
+            break;
+            case "verify":
+              setShowDisplay(false);
+              setShowSearch(false);
+              setShowUpdate(false);
+              setShowVerify(true);
+              setShowCreate(false);
+              setDisplayEvent(false);
+              
+              break;
+              case "create":
+                setShowDisplay(false);
+                setShowSearch(false);
+                setShowUpdate(false);
+                setShowVerify(false);
+                setDisplayEvent(false);
+                setShowCreate(true);
+                
+                break;
+                case "displayEvent":
+                  setShowDisplay(false);
+                  setShowSearch(false);
+                  setDisplayEvent(true);
+                  setShowUpdate(false);
+                  setShowVerify(false);
+                  setShowCreate(false);
+                  
+                  break;
+                  
+                  default:
+                    break;
     }
   };
+  console.log(uid)
   return (
     <>
       <div className="flex w-full h-full">
         <div className="border-r-4 w-56 p-2 h-screen text-xl sticky">
           <ul className="space-y-3 mt-3">
             <div
-              onClick={() => handleClick("register")}
+              onClick={() => handleClick("display")}
               className={`flex items-center space-x-3 p-3 hover:cursor-pointer ${
-                register ? "shadow-lg rounded-lg" : " shadow-none"
+                display ? "shadow-lg rounded-lg" : " shadow-none"
               }`}
             >
               <MdAppRegistration />
-              <p>Register College</p>
+              <p>Display College</p>
             </div>
             <div
               onClick={() => handleClick("search")}
@@ -122,14 +154,24 @@ function AdminDashBoard() {
               <BsCalendar2Event />
               <p>Create Event</p>
             </div>
+            <div
+              onClick={() => handleClick("displayEvent")}
+              className={`flex items-center space-x-3 p-3 hover:cursor-pointer ${
+                displayEvent ? "shadow-lg rounded-lg" : " shadow-none"
+              }`}
+            >
+              <BsCalendar2Event />
+              <p>View Event</p>
+            </div>
           </ul>
         </div>
         <div className="m-4 flex-1">
-          <RegisterCollege register={register} />
+          <CollegeProfile display={display} adminDetails={adminDetails}/>
           <Search search={search} />
           <UpdateAlumni update={update} />
-          <VerifyAlumni verify={verify} />
-          <CreateEvent create={create} />
+          <VerifyAlumni verify={verify} adminDetails={adminDetails}/>
+          <CreateEvent create={create} uid={uid} />
+          <DisplayEvent displayEvent={displayEvent} uid={uid}/>
         </div>
       </div>
     </>

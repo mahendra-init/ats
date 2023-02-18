@@ -1,28 +1,55 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react';
+import { db } from '../../firebase';
+import { collection, doc, orderBy, onSnapshot } from '@firebase/firestore';
 
-function DisplayEvent() {
-    let today = new Date()
-    let date = today.getDate() + '/' + parseInt(today.getMonth() + 1) + '/' + today.getFullYear()
-  return (
-    <div className="flex flex-col w-[50vw] shadow-xl border-solid border-1 border-indigo-600">
-        <div className='flex'>
-            <img className=' w-full object-contain' src='https://images.unsplash.com/photo-1579548122080-c35fd6820ecb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8YmFubmVyfGVufDB8fDB8fA%3D%3D&auto=format&fit=crop&w=500&q=60' alt="banner" />
-            </div>
-        <div className="flex-1 flex flex-col bg-gradient-to-b from-indigo-500">
-            <div className='flex items-center'>
 
-          <h2 className="text-2xl flex-1 font-bold text-white text-start ml-3 font-sans">
-            CSS Battle
-          </h2>
-          <p className='mr-2 text-md font-medium'>{date}</p>
-            </div>
-          <p className='text-md text-dimWhite text-justify mx-3 mt-3 font-sans tracking-loose leading-tight'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum voluptatem molestias ipsam nam esse numquam? Laudantium, quae hic cupiditate officia, ducimus delectus, in dolor deserunt consectetur vel enim explicabo! Officiis?</p>
-        </div>
-        <div className='flex justify-end text-md mr-3 py-2'>
-          <p className='font-bold'>Organized by ACE</p>
-        </div>
+
+const Event = ({title, desc}) => (
+
+  <div className="flex flex-col w-[50vw] shadow-xl border-solid border-1 border-indigo-600 bg-gradient-to-r from-indigo-400 my-2">
+    <div className="flex items-center py-10 border-b-indigo-600">
+      <h2 className="text-xl flex-1 font-bold text-black text-start ml-3 font-sans">
+        {title}
+      </h2>
     </div>
-  )
+    <div className="flex-1 flex flex-col ">
+      <p className="text-md text-dimWhite text-justify mx-3 mt-3 font-sans tracking-loose leading-tight">
+        {desc}
+      </p>
+    </div>
+    <div className="flex justify-end mr-3 py-2">
+      <p className="mr-2 text-md">Created on:</p>
+    </div>
+  </div>
+);
+
+function DisplayEvent({displayEvent, uid}) {
+  const [ events, setEvents] = useState([]);
+
+  useEffect(() => {
+        if(uid){
+            const adminCollectionRef = collection(db, `admins`);
+            const adminDocRef = doc(adminCollectionRef, uid)
+            const eventCollectionRef = collection(adminDocRef, `events`);
+
+            onSnapshot(eventCollectionRef, orderBy('created', 'desc'), (snapshot) => {
+                setEvents(snapshot.docs.map(doc => ({
+                  id: doc.id, 
+                  data: doc.data()
+                })));
+                console.log(events)
+              });
+        } else {
+            setEvents([])
+        }
+    }, [uid])
+    if(displayEvent){
+      return (
+        events.map(({id, data}) => (
+          <Event className key={id} title={data.name} desc={data.description}/>
+          ))
+          )
+        }
 }
 
-export default DisplayEvent
+export default DisplayEvent;

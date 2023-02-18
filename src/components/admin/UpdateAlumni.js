@@ -8,7 +8,7 @@ function UpdateAlumni({ update }) {
     return (
       <>
         <Search search={true} />
-        {user && <Profile profile={user} />}
+        {/* {user && <Profile profile={user} />} */}
       </>
     );
   }

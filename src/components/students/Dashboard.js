@@ -29,7 +29,6 @@ function Dashboard() {
       if (docSnap.exists()) {
         setUserDetails(docSnap.data());
       } else {
-        // doc.data() will be undefined in this case
         console.log("No such document!");
       }
     }
@@ -127,10 +126,10 @@ function Dashboard() {
           </div>
         </ul>
       </aside>
-      <main className="m-4 flex-1 ">
+      <main className="m-4 flex-1 overflow-y-auto ">
         <Profile profile={profile} userDetails={userDetails} />
-        <Blog blog={blog} />
-        <CreateBlog createBlog={createBlog} />
+        <Blog blog={blog} uid={uid} />
+        <CreateBlog createBlog={createBlog} uid={uid} />
         <Chat room="ace" groupchat={groupChat} />
       </main>
     </div>
